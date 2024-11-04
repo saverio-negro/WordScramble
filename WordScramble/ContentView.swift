@@ -32,36 +32,41 @@ struct ContentView: View {
     
     var body: some View {
         NavigationStack {
-            VStack {
-                List {
-                    Section("Word to spell from") {
-                        Text(rootWord)
-                            .font(.largeTitle)
-                    }
-                }
-                .scrollDisabled(true)
-                .listStyle(.plain)
+            ZStack {
+                LinearGradient(colors: [Color.cyan, Color.teal], startPoint: .leading, endPoint: .trailing)
+                    .ignoresSafeArea()
                 
-                Form {
-                    Section("Word to spell from \(rootWord)") {
-                        TextField("Enter your word", text: $newWord)
-                            .textInputAutocapitalization(.never)
-                            .onSubmit(addNewWord)
+                VStack {
+                    List {
+                        Section("Word to spell from") {
+                            Text(rootWord)
+                                .font(.largeTitle)
+                                .listRowBackground(Color.clear)
+                        }
+                        
+                        Section("Word to spell from \(rootWord)") {
+                            TextField("Enter your word", text: $newWord)
+                                .textInputAutocapitalization(.never)
+                                .onSubmit(addNewWord)
+                                .listRowBackground(Color.clear)
+                        }
                     }
-                }
-                .formStyle(.columns)
-                
-                List {
-                    Section("Used words") {
-                        ForEach(usedWords, id: \.self) { usedWord in
-                            HStack {
-                                Image(systemName: "\(usedWord.count).circle")
-                                Text(usedWord)
+                    .scrollDisabled(true)
+                    .listStyle(.plain)
+                    
+                    List {
+                        Section("Used words") {
+                            ForEach(usedWords, id: \.self) { usedWord in
+                                HStack {
+                                    Image(systemName: "\(usedWord.count).circle")
+                                    Text(usedWord)
+                                }
+                                .listRowBackground(Color.clear)
                             }
                         }
                     }
+                    .listStyle(.plain)
                 }
-                .listStyle(.plain)
             }
             .navigationTitle("WordScramble")
         }
