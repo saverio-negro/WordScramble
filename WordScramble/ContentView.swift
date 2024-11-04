@@ -13,6 +13,28 @@ struct ContentView: View {
     @State private var rootWord = ""
     @State private var newWord = ""
     
+    func startGame() {
+        // Find the URL for start.txt in our app bundle
+        if let startWordsURL = Bundle.main.url(forResource: "start", withExtension: "txt") {
+            
+            // Load start.txt into a string
+            if let startWords = try? String(contentsOf: startWordsURL, encoding: .utf8) {
+                
+                // Split the string into an array of strings - splitting on line breaks
+                let words = startWords.components(separatedBy: "\n")
+                
+                // Pick one random word, or use "silkworm" as a sensible default
+                let word = words.randomElement() ?? "silkworm"
+                rootWord = word.trimmingCharacters(in: .whitespacesAndNewlines)
+                
+            } else {
+                fatalError("Unable to load `start.txt` file.")
+            }
+        } else {
+            fatalError("Unable to locate `start.txt` file.")
+        }
+    }
+    
     // Validate the new word and add it to the list of used words
     func addNewWord() -> Void {
         
@@ -33,7 +55,7 @@ struct ContentView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                LinearGradient(colors: [Color.cyan, Color.teal], startPoint: .leading, endPoint: .trailing)
+                LinearGradient(colors: [Color.indigo, Color.blue], startPoint: .leading, endPoint: .trailing)
                     .ignoresSafeArea()
                 
                 VStack {
@@ -70,16 +92,7 @@ struct ContentView: View {
             }
             .navigationTitle("WordScramble")
         }
-        .onAppear {
-            if let fileURL = Bundle.main.url(forResource: "start", withExtension: "txt") {
-                if let fileContents = try? String(contentsOf: fileURL, encoding: .utf8) {
-                    let words = fileContents.components(separatedBy: "\n")
-                    if let word = words.randomElement()?.trimmingCharacters(in: .whitespacesAndNewlines) {
-                        rootWord = word
-                    }
-                }
-            }
-        }
+        .onAppear(perform: startGame)
     }
 }
 
