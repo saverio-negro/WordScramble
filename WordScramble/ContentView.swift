@@ -12,6 +12,9 @@ struct ContentView: View {
     @State private var usedWords = [String]()
     @State private var rootWord = ""
     @State private var newWord = ""
+    @State private var errorTitle = ""
+    @State private var errorMessage = ""
+    @State private var showingError = false
     
     func startGame() {
         // Find the URL for start.txt in our app bundle
@@ -45,6 +48,24 @@ struct ContentView: View {
         // Exit if the remaining string is empty
         guard answer.count > 0 else { return }
         
+        // Exit if the word has already been used
+        guard isOriginal(word: answer) else {
+            wordError(title: "Word used already", message: "The word has already been used. Be more original.")
+            return
+        }
+        
+        // Exit if the word can't be spelled from the root word
+        guard isPossible(word: answer) else {
+            wordError(title: "Word not possible", message: "The word you are trying to spell is not contained in \(rootWord).")
+            return
+        }
+        
+        // Exit if the word is not an English word
+        guard isReal(word: answer) else {
+            wordError(title: "Word not recognized", message: "The word you inserted is not a real word. You can't just make them up, you know.")
+            return
+        }
+        
         withAnimation {
             usedWords.insert(answer, at: 0)
         }
@@ -52,10 +73,55 @@ struct ContentView: View {
         newWord = ""
     }
     
+    // Word Validation - ensure the user can't enter invalid words
+    
+    // Check whether the word has already been used
+    func isOriginal(word: String) -> Bool {
+        !usedWords.contains(word)
+    }
+    
+    // Check whether the word can be spelled from the root word
+    func isPossible(word: String) -> Bool {
+        var tempWord = rootWord
+        
+        for letter in word {
+            if let index = tempWord.firstIndex(of: letter) {
+                tempWord.remove(at: index)
+            } else {
+                return false
+            }
+        }
+        return true
+    }
+    
+    // Check whether the word is an actual English word
+    func isReal(word: String) -> Bool {
+        /// Instantiate a spellchecker instance from `UITextChecker`
+        let checker = UITextChecker()
+        
+        /// Create an Objective-C range to specify the part of the text to be checked for
+        let range = NSRange(location: 0, length: word.utf16.count)
+        
+        /// Get the range of mispelled word
+        let mispelledRange = checker.rangeOfMisspelledWord(in: word, range: range, startingAt: 0, wrap: false, language: "en")
+        
+        /// Return true if no range was found (the word is real)
+        let isWordSpelledCorrectly = mispelledRange.location == NSNotFound
+        return isWordSpelledCorrectly
+    }
+    
+    // Manage the presentation of errors in the alert
+    func wordError(title: String, message: String) {
+        errorTitle = title
+        errorMessage = message
+        showingError = true
+    }
+    
     var body: some View {
         NavigationStack {
             ZStack {
-                LinearGradient(colors: [Color.indigo, Color.blue], startPoint: .leading, endPoint: .trailing)
+                
+                RadialGradient(colors: [Color.blue, Color.white], center: .top, startRadius: 450, endRadius: 451)
                     .ignoresSafeArea()
                 
                 VStack {
@@ -91,6 +157,11 @@ struct ContentView: View {
                 }
             }
             .navigationTitle("WordScramble")
+            .alert(errorTitle, isPresented: $showingError) {
+                Button("OK", role: .destructive) {}
+            } message: {
+                Text(errorMessage)
+            }
         }
         .onAppear(perform: startGame)
     }
