@@ -15,6 +15,8 @@ struct ContentView: View {
     @State private var errorTitle = ""
     @State private var errorMessage = ""
     @State private var showingError = false
+    @State private var score = 0
+    @State private var bonus = 0
     
     func startGame() {
         // Find the URL for start.txt in our app bundle
@@ -46,7 +48,7 @@ struct ContentView: View {
         let answer = newWord.lowercased().trimmingCharacters(in: .whitespacesAndNewlines)
         
         // Exit if the remaining string is empty
-        guard answer.count > 0 else { return }
+        guard answer.count > 2 && answer != rootWord else { return }
         
         // Exit if the word has already been used
         guard isOriginal(word: answer) else {
@@ -69,6 +71,9 @@ struct ContentView: View {
         withAnimation {
             usedWords.insert(answer, at: 0)
         }
+        
+        score += getScorePerLetterCount(count: answer.count)
+        bonus = getBonusScorePerNumWords(of: 3, points: 2, numWordsGuessed: usedWords.count)
         
         newWord = ""
     }
@@ -117,6 +122,17 @@ struct ContentView: View {
         showingError = true
     }
     
+    // Get score per number of words guessed
+    func getBonusScorePerNumWords(of num: Int, points: Int, numWordsGuessed: Int) -> Int {
+        /// Give `points` extra points every `num` words guessed
+        return (numWordsGuessed / num) * points
+    }
+    
+    // Get score per letter count in the spelled word
+    func getScorePerLetterCount(count: Int, pointsPerChar: Int = 1) -> Int {
+        return count * pointsPerChar
+    }
+    
     var body: some View {
         NavigationStack {
             ZStack {
@@ -143,7 +159,9 @@ struct ContentView: View {
                     .listStyle(.plain)
                     
                     List {
-                        Section("Used words") {
+                        Section() {
+                            Text("Used Words")
+                                .listRowBackground(Color.clear)
                             ForEach(usedWords, id: \.self) { usedWord in
                                 HStack {
                                     Image(systemName: "\(usedWord.count).circle")
@@ -154,13 +172,39 @@ struct ContentView: View {
                         }
                     }
                     .listStyle(.plain)
+                    .listRowBackground(Color.clear)
+                    
+                    List {
+                        Section("Your Current Score") {
+                            Text(String(score))
+                                .listRowBackground(Color.clear)
+                        }
+                        .font(.largeTitle)
+                        
+                        Section("Your Bonus Score") {
+                            Text(String(bonus))
+                                .listRowBackground(Color.clear)
+                        }
+                    }
+                    .scrollDisabled(true)
+                    .listStyle(.plain)
                 }
+                .foregroundStyle(Material.regular)
+                .font(.title2)
             }
             .navigationTitle("WordScramble")
             .alert(errorTitle, isPresented: $showingError) {
                 Button("OK", role: .destructive) {}
             } message: {
                 Text(errorMessage)
+            }
+            .toolbar {
+                Button {
+                    startGame()
+                } label: {
+                    Text("Restart")
+                        .foregroundStyle(Material.regular)
+                }
             }
         }
         .onAppear(perform: startGame)
