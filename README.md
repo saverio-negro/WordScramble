@@ -1,7 +1,6 @@
 # WordScramble
 
-### Are you a coffee drinker and would like to improve the quality of your sleep? I've got you covered with "BetterRest".
-### Know how much sleep you should get in order to feel rested. 😴💤
+#### A simple game where you need to make words out of random eight-letter words.
 
 <img src="./images/WordScramble.gif" width="25%" height="25%"/>
 
