@@ -1,6 +1,6 @@
 # WordScramble
 
-#### A simple game where you need to make words out of random eight-letter words.
+#### A simple game where you need to make words out of random eight-letter words. 🤓
 
 <img src="./Images/WordScramble.gif" width="25%" height="25%"/>
 
