@@ -2,7 +2,7 @@
 
 #### A simple game where you need to make words out of random eight-letter words.
 
-<img src="./images/WordScramble.gif" width="25%" height="25%"/>
+<img src="./Images/WordScramble.gif" width="25%" height="25%"/>
 
 ### NOTE:
 
